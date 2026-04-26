@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import logo from "../assets/logo-segundo.png";
+import logo from "../assets/react.svg"; // <- usa esse por enquanto
 import "./login.css";
 
 export default function Login({ onLogin }) {
@@ -79,7 +79,7 @@ export default function Login({ onLogin }) {
       return;
     }
 
-    setMensagem("Enviamos um link para trocar sua senha no email.");
+    setMensagem("Link de recuperação enviado para seu email.");
   }
 
   async function trocarSenha(e) {
@@ -88,7 +88,7 @@ export default function Login({ onLogin }) {
     setMensagem("");
 
     if (!novaSenha || novaSenha.length < 6) {
-      setErro("A nova senha precisa ter pelo menos 6 caracteres.");
+      setErro("A senha deve ter pelo menos 6 caracteres.");
       return;
     }
 
@@ -101,7 +101,7 @@ export default function Login({ onLogin }) {
       return;
     }
 
-    setMensagem("Senha alterada com sucesso! Agora faça login.");
+    setMensagem("Senha alterada com sucesso!");
     setModo("entrar");
     setNovaSenha("");
   }
@@ -113,6 +113,7 @@ export default function Login({ onLogin }) {
 
         <h1>Sistema Escolar</h1>
 
+        {/* ===== ENTRAR ===== */}
         {modo === "entrar" && (
           <form onSubmit={entrar}>
             <p>Entrar no sistema</p>
@@ -136,18 +137,29 @@ export default function Login({ onLogin }) {
             {erro && <p className="login-error">{erro}</p>}
             {mensagem && <p className="login-success">{mensagem}</p>}
 
-            <button className="login-btn" type="submit">Entrar</button>
+            <button className="login-btn" type="submit">
+              Entrar
+            </button>
 
-            <button type="button" className="login-secondary" onClick={() => setModo("criar")}>
+            <button
+              type="button"
+              className="login-secondary"
+              onClick={() => setModo("criar")}
+            >
               Criar conta
             </button>
 
-            <button type="button" className="login-link" onClick={() => setModo("esqueci")}>
+            <button
+              type="button"
+              className="login-link"
+              onClick={() => setModo("esqueci")}
+            >
               Esqueci a senha
             </button>
           </form>
         )}
 
+        {/* ===== CRIAR CONTA ===== */}
         {modo === "criar" && (
           <form onSubmit={criarConta}>
             <p>Criar conta</p>
@@ -171,14 +183,21 @@ export default function Login({ onLogin }) {
             {erro && <p className="login-error">{erro}</p>}
             {mensagem && <p className="login-success">{mensagem}</p>}
 
-            <button className="login-btn" type="submit">Criar conta</button>
+            <button className="login-btn" type="submit">
+              Criar conta
+            </button>
 
-            <button type="button" className="login-secondary" onClick={() => setModo("entrar")}>
+            <button
+              type="button"
+              className="login-secondary"
+              onClick={() => setModo("entrar")}
+            >
               Já tenho conta
             </button>
           </form>
         )}
 
+        {/* ===== ESQUECI SENHA ===== */}
         {modo === "esqueci" && (
           <form onSubmit={enviarRecuperacao}>
             <p>Recuperar senha</p>
@@ -194,14 +213,21 @@ export default function Login({ onLogin }) {
             {erro && <p className="login-error">{erro}</p>}
             {mensagem && <p className="login-success">{mensagem}</p>}
 
-            <button className="login-btn" type="submit">Enviar link</button>
+            <button className="login-btn" type="submit">
+              Enviar link
+            </button>
 
-            <button type="button" className="login-secondary" onClick={() => setModo("entrar")}>
+            <button
+              type="button"
+              className="login-secondary"
+              onClick={() => setModo("entrar")}
+            >
               Voltar
             </button>
           </form>
         )}
 
+        {/* ===== TROCAR SENHA ===== */}
         {modo === "trocarSenha" && (
           <form onSubmit={trocarSenha}>
             <p>Trocar senha</p>
@@ -217,7 +243,9 @@ export default function Login({ onLogin }) {
             {erro && <p className="login-error">{erro}</p>}
             {mensagem && <p className="login-success">{mensagem}</p>}
 
-            <button className="login-btn" type="submit">Salvar nova senha</button>
+            <button className="login-btn" type="submit">
+              Salvar nova senha
+            </button>
           </form>
         )}
       </div>

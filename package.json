@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.104.1",
     "reacharts": "^0.4.5",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
