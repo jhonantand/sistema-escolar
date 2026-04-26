@@ -1,32 +1,15 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
-import logo from "../assets/react.svg"; // <- usa esse por enquanto
+import { useState } from "react";
+import { supabase } from "../supabase";
 import "./login.css";
 
 export default function Login({ onLogin }) {
-  const [modo, setModo] = useState("entrar");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [novaSenha, setNovaSenha] = useState("");
-  const [erro, setErro] = useState("");
-  const [mensagem, setMensagem] = useState("");
+  const [modo, setModo] = useState("login"); // login | cadastro | recuperar
 
-  useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setModo("trocarSenha");
-      }
-    });
-
-    return () => {
-      data.subscription.unsubscribe();
-    };
-  }, []);
-
-  async function entrar(e) {
+  // 🔐 LOGIN
+  const entrar = async (e) => {
     e.preventDefault();
-    setErro("");
-    setMensagem("");
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -34,17 +17,16 @@ export default function Login({ onLogin }) {
     });
 
     if (error) {
-      setErro("Email ou senha inválidos.");
+      alert("Email ou senha inválidos");
       return;
     }
 
-    if (onLogin) onLogin(data.user);
-  }
+    onLogin(data.user);
+  };
 
-  async function criarConta(e) {
+  // 🆕 CRIAR CONTA
+  const criarConta = async (e) => {
     e.preventDefault();
-    setErro("");
-    setMensagem("");
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -52,203 +34,94 @@ export default function Login({ onLogin }) {
     });
 
     if (error) {
-      setErro(error.message);
+      alert("Erro ao criar conta");
       return;
     }
 
-    setMensagem("Conta criada! Agora clique em Entrar.");
-    setModo("entrar");
-  }
+    alert("Conta criada! Verifique seu email.");
+    setModo("login");
+  };
 
-  async function enviarRecuperacao(e) {
+  // 🔁 RECUPERAR SENHA
+  const recuperarSenha = async (e) => {
     e.preventDefault();
-    setErro("");
-    setMensagem("");
 
-    if (!email) {
-      setErro("Digite seu email primeiro.");
-      return;
-    }
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin,
-    });
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
 
     if (error) {
-      setErro(error.message);
+      alert("Erro ao enviar email");
       return;
     }
 
-    setMensagem("Link de recuperação enviado para seu email.");
-  }
-
-  async function trocarSenha(e) {
-    e.preventDefault();
-    setErro("");
-    setMensagem("");
-
-    if (!novaSenha || novaSenha.length < 6) {
-      setErro("A senha deve ter pelo menos 6 caracteres.");
-      return;
-    }
-
-    const { error } = await supabase.auth.updateUser({
-      password: novaSenha,
-    });
-
-    if (error) {
-      setErro(error.message);
-      return;
-    }
-
-    setMensagem("Senha alterada com sucesso!");
-    setModo("entrar");
-    setNovaSenha("");
-  }
+    alert("Email de recuperação enviado!");
+    setModo("login");
+  };
 
   return (
-    <div className="login-page">
-      <div className="login-card">
-        <img src={logo} alt="Logo" className="login-logo" />
+    <div className="login-container">
+      <form
+        onSubmit={
+          modo === "login"
+            ? entrar
+            : modo === "cadastro"
+            ? criarConta
+            : recuperarSenha
+        }
+        className="login-box"
+      >
+        <h2>
+          {modo === "login"
+            ? "Entrar"
+            : modo === "cadastro"
+            ? "Criar conta"
+            : "Recuperar senha"}
+        </h2>
 
-        <h1>Sistema Escolar</h1>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
-        {/* ===== ENTRAR ===== */}
-        {modo === "entrar" && (
-          <form onSubmit={entrar}>
-            <p>Entrar no sistema</p>
-
-            <input
-              type="email"
-              placeholder="Seu email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-
-            <input
-              type="password"
-              placeholder="Sua senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              required
-            />
-
-            {erro && <p className="login-error">{erro}</p>}
-            {mensagem && <p className="login-success">{mensagem}</p>}
-
-            <button className="login-btn" type="submit">
-              Entrar
-            </button>
-
-            <button
-              type="button"
-              className="login-secondary"
-              onClick={() => setModo("criar")}
-            >
-              Criar conta
-            </button>
-
-            <button
-              type="button"
-              className="login-link"
-              onClick={() => setModo("esqueci")}
-            >
-              Esqueci a senha
-            </button>
-          </form>
+        {modo !== "recuperar" && (
+          <input
+            type="password"
+            placeholder="Senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            required
+          />
         )}
 
-        {/* ===== CRIAR CONTA ===== */}
-        {modo === "criar" && (
-          <form onSubmit={criarConta}>
-            <p>Criar conta</p>
+        <button type="submit">
+          {modo === "login"
+            ? "Entrar"
+            : modo === "cadastro"
+            ? "Criar conta"
+            : "Enviar email"}
+        </button>
 
-            <input
-              type="email"
-              placeholder="Seu email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+        <div className="login-links">
+          {modo === "login" && (
+            <>
+              <p onClick={() => setModo("cadastro")}>
+                Não tem conta? Criar conta
+              </p>
+              <p onClick={() => setModo("recuperar")}>
+                Esqueci a senha
+              </p>
+            </>
+          )}
 
-            <input
-              type="password"
-              placeholder="Crie uma senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              required
-            />
-
-            {erro && <p className="login-error">{erro}</p>}
-            {mensagem && <p className="login-success">{mensagem}</p>}
-
-            <button className="login-btn" type="submit">
-              Criar conta
-            </button>
-
-            <button
-              type="button"
-              className="login-secondary"
-              onClick={() => setModo("entrar")}
-            >
+          {modo !== "login" && (
+            <p onClick={() => setModo("login")}>
               Já tenho conta
-            </button>
-          </form>
-        )}
-
-        {/* ===== ESQUECI SENHA ===== */}
-        {modo === "esqueci" && (
-          <form onSubmit={enviarRecuperacao}>
-            <p>Recuperar senha</p>
-
-            <input
-              type="email"
-              placeholder="Digite seu email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-
-            {erro && <p className="login-error">{erro}</p>}
-            {mensagem && <p className="login-success">{mensagem}</p>}
-
-            <button className="login-btn" type="submit">
-              Enviar link
-            </button>
-
-            <button
-              type="button"
-              className="login-secondary"
-              onClick={() => setModo("entrar")}
-            >
-              Voltar
-            </button>
-          </form>
-        )}
-
-        {/* ===== TROCAR SENHA ===== */}
-        {modo === "trocarSenha" && (
-          <form onSubmit={trocarSenha}>
-            <p>Trocar senha</p>
-
-            <input
-              type="password"
-              placeholder="Nova senha"
-              value={novaSenha}
-              onChange={(e) => setNovaSenha(e.target.value)}
-              required
-            />
-
-            {erro && <p className="login-error">{erro}</p>}
-            {mensagem && <p className="login-success">{mensagem}</p>}
-
-            <button className="login-btn" type="submit">
-              Salvar nova senha
-            </button>
-          </form>
-        )}
-      </div>
+            </p>
+          )}
+        </div>
+      </form>
     </div>
   );
 }
