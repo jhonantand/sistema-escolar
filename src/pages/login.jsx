@@ -71,7 +71,7 @@ export default function Login({ onLogin }) {
       >
         <h2>
           {modo === "login"
-            ? "Entrar"
+            ? "bem vindo de volta"
             : modo === "cadastro"
             ? "Criar conta"
             : "Recuperar senha"}
